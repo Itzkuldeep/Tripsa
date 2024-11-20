@@ -1,21 +1,17 @@
-# Import libraries
+
 from dotenv import load_dotenv
 import os
 import time
 import google.generativeai as genai
 import streamlit as st
 
-# Load the API Key
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# Function to load Google Gemini Pro Model and get response
 def get_response(prompt):
     model = genai.GenerativeModel('gemini-pro')
     response = model.generate_content([prompt])
     return response.text
 
-# Function to detect nonsensical input
 def is_nonsensical_input(user_message):
     if len(user_message.strip()) < 3 or not any(c.isalnum() for c in user_message):
         return True
@@ -24,11 +20,9 @@ def is_nonsensical_input(user_message):
         return True
     return False
 
-# Initialize Streamlit app
 st.set_page_config(page_title="Tripsa: AI Trip Planner and Advisor", page_icon="🌍", layout="centered")
 st.header("🌍 Tripsa: Your Conversational AI Trip Planner!")
 
-# Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "conversation_stage" not in st.session_state:
@@ -42,10 +36,8 @@ if "trip_details" not in st.session_state:
         "type_of_stay": None,
     }
 
-# Function to handle conversation flow
 def handle_conversation(user_message):
 
-    # Normal conversation flow
     stage = st.session_state.conversation_stage
     trip_details = st.session_state.trip_details
 
@@ -94,34 +86,30 @@ def handle_conversation(user_message):
     else:
         return "Is there anything else you'd like to plan or ask about?"
 
-# Chat interface
 st.markdown("### Chat with your AI Planner")
 
-# Show initial greeting when user arrives
 if len(st.session_state.messages) == 0:
     initial_greeting = handle_conversation("")
     st.session_state.messages.append({"role": "assistant", "content": initial_greeting})
 
-# Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Input for user messages
 if user_input := st.chat_input("Type your message here..."):
-    # Append user message
+    
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Simulate typing indicator
+    
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        for _ in range(3):  # Simulate 3 typing dots
+        for _ in range(3):  
             message_placeholder.markdown("Typing" + "." * (_ + 1))
             time.sleep(0.5)
 
-    # Generate bot response
+    
     bot_response = handle_conversation(user_input)
     st.session_state.messages.append({"role": "assistant", "content": bot_response})
     message_placeholder.markdown(bot_response)
