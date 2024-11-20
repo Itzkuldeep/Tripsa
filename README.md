@@ -1,6 +1,3 @@
-### `README.md` Content for Your Project
-
-```markdown
 # 🌍 Tripsa: Conversational AI Trip Planner
 
 Tripsa is your smart travel assistant powered by Google Gemini API. It helps you plan your trips step-by-step, ensuring you don't miss out on any crucial details. From selecting your destination to summarizing your travel itinerary, Tripsa is here to make travel planning a breeze!
@@ -21,8 +18,6 @@ Tripsa is your smart travel assistant powered by Google Gemini API. It helps you
 - **Backend:** Google Gemini API for content generation
 - **Programming Language:** Python
 - **Environment:** Streamlit Cloud
-
----
 
 ## 🔧 Installation & Setup
 
@@ -96,8 +91,3 @@ For queries or feedback, please reach out at `your.email@example.com`.
 ### GitHub Repository Description
 
 ```
-🌍 **Tripsa: Conversational AI Trip Planner**  
-Your ultimate travel buddy powered by Google Gemini API! Plan your trips interactively, get personalized itineraries, and enjoy a seamless travel-planning experience with humor and a human-like touch. 🚀
-```
-
-Let me know if you want any customization for the README or description!
