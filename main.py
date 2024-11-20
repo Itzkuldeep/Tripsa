@@ -1,6 +1,7 @@
 # Import libraries
 from dotenv import load_dotenv
 import os
+import time
 import google.generativeai as genai
 import streamlit as st
 
@@ -14,7 +15,16 @@ def get_response(prompt):
     response = model.generate_content([prompt])
     return response.text
 
-# Initialize the Streamlit app
+# Function to detect nonsensical input
+def is_nonsensical_input(user_message):
+    if len(user_message.strip()) < 3 or not any(c.isalnum() for c in user_message):
+        return True
+    nonsensical_keywords = ["blah", "asdf", "random", "nothing", "whatever"]
+    if any(keyword in user_message.lower() for keyword in nonsensical_keywords):
+        return True
+    return False
+
+# Initialize Streamlit app
 st.set_page_config(page_title="Tripsa: AI Trip Planner and Advisor", page_icon="🌍", layout="centered")
 st.header("🌍 Tripsa: Your Conversational AI Trip Planner!")
 
@@ -32,19 +42,21 @@ if "trip_details" not in st.session_state:
         "type_of_stay": None,
     }
 
-# Conversation stages logic
+# Function to handle conversation flow
 def handle_conversation(user_message):
+
+    # Normal conversation flow
     stage = st.session_state.conversation_stage
     trip_details = st.session_state.trip_details
 
     if stage == "greeting":
         st.session_state.conversation_stage = "ask_destination"
-        return "Hello! I'm Tripsa, your AI travel planner. Let's plan your perfect trip! Where would you like to go?"
+        return "Hello! I'm Tripsa, your AI travel buddy. Let's plan your perfect trip! Where would you like to go?"
 
     elif stage == "ask_destination":
         trip_details["destination"] = user_message
         st.session_state.conversation_stage = "ask_number_of_people"
-        return f"Great choice! How many people are going on this trip?"
+        return "Great choice! How many people are going on this trip?"
 
     elif stage == "ask_number_of_people":
         trip_details["number_of_people"] = user_message
@@ -82,23 +94,34 @@ def handle_conversation(user_message):
     else:
         return "Is there anything else you'd like to plan or ask about?"
 
-# Main chat interface
+# Chat interface
 st.markdown("### Chat with your AI Planner")
 
-# Display existing chat messages
+# Show initial greeting when user arrives
+if len(st.session_state.messages) == 0:
+    initial_greeting = handle_conversation("")
+    st.session_state.messages.append({"role": "assistant", "content": initial_greeting})
+
+# Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Input for new user messages
+# Input for user messages
 if user_input := st.chat_input("Type your message here..."):
-    # Append user message to chat history
+    # Append user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Get bot response based on conversation stage
+    # Simulate typing indicator
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        for _ in range(3):  # Simulate 3 typing dots
+            message_placeholder.markdown("Typing" + "." * (_ + 1))
+            time.sleep(0.5)
+
+    # Generate bot response
     bot_response = handle_conversation(user_input)
     st.session_state.messages.append({"role": "assistant", "content": bot_response})
-    with st.chat_message("assistant"):
-        st.markdown(bot_response)
+    message_placeholder.markdown(bot_response)
