@@ -1,76 +1,191 @@
-#Import all the library
+# #Import all the library
+# from dotenv import load_dotenv
+# import os
+# import google.generativeai as genai
+# from PIL import Image
+# import streamlit as st
+
+# #Load the API Key
+# load_dotenv()
+# genai.configure(api_key = os.getenv("GOOGLE_API_KEY"))
+
+# #Function to load Google Gemini Vision Model and get response
+# def get_response_image(image, prompt):
+#     model = genai.GenerativeModel('gemini-pro-vision')
+#     response = model.generate_content([image[0], prompt])
+#     return response.text
+
+# #Function to load Google Gemini Pro Model and get response
+# def get_response(prompt, input):
+#     model = genai.GenerativeModel('gemini-pro')
+#     response = model.generate_content([prompt, input])
+#     return response.text
+
+    
+# #Initialize the streamlit app
+# st.set_page_config(page_title="Tripsa: AI Trip Planner and Advisor", page_icon="🌍", layout="centered", initial_sidebar_state="expanded")
+# st.image('D:\Tripsa\gaj.jpg', width=70)
+# st.header("Tripsa: Discover and Plan your Culinary Adventures!")
+
+
+# # Define the state for the selected section
+# if "section_choice" not in st.session_state:
+#     st.session_state.section_choice = None
+
+# # Buttons for choosing sections
+# col1, col2 = st.columns(2)
+# with col1:
+#     if st.button("Trip Planner"):
+#         st.session_state.section_choice = "Trip Planner"
+# with col2:
+#     if st.button("Restaurant & Hotel Planner"):
+#         st.session_state.section_choice = "Restaurant & Hotel Planner"
+
+# # Display content based on the selected section
+# if st.session_state.section_choice == "Trip Planner":
+#     # Prompt Template
+#     input_prompt_planner = """
+#     You are an expert Tour Planner. Your job is to provide recommendations and plan for a given location, 
+#     number of days, number of people, and type of trip (Friends, Family, Solo, Honeymoon, Adventure, etc.), 
+#     even if the number of days is not provided.
+#     Also, suggest hidden secrets, hotels, and beautiful places we shouldn't forget to visit.
+#     Also, tell the best month to visit the given place.
+#     Return the response using markdown.
+#     """
+
+#     # Input
+#     input_plan = st.text_area("Provide location, number of days, number of people, and type of trip to obtain an itinerary plan!")
+#     # Button
+#     submit1 = st.button("Plan my Trip!")
+#     if submit1:
+#         response = get_response(input_prompt_planner, input_plan)
+#         st.subheader("Planner Bot: ")
+#         st.write(response)
+# ###########################################################################################
+# #If the choice is Restaurant & Hotel Planner
+# if st.session_state.section_choice == "Restaurant & Hotel Planner":
+
+#     #Prompt Template
+#     input_prompt_planner = """
+#     You are an expert Restaurant & Hotel Planner. 
+#     Your job is to provide Restaurant & Hotel for given place and you have to provide not very expensive and not very cheap,
+#     - Provide rating of the restaurant/hotel
+#     - Top 5 restaurants with address and average cost per cuisine
+#     - Top 5 hotels with address and average cost per night
+#     Retun the response using markdown.
+#     """
+#     #Input
+#     input_plan = st.text_area("Provide location to find Hotel & Restaurants!")
+#     #Button
+#     submit1 = st.button("Find Restaurant & Hotel!")
+#     if submit1:
+#         response = get_response(input_prompt_planner, input_plan)
+#         st.subheader("Acomodation Bot: ")
+#         st.write(response)
+
+
+
+# Import libraries
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
-from PIL import Image
 import streamlit as st
 
-#Load the API Key
+# Load the API Key
 load_dotenv()
-genai.configure(api_key = os.getenv("GOOGLE_API_KEY"))
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-#Function to load Google Gemini Vision Model and get response
-def get_response_image(image, prompt):
-    model = genai.GenerativeModel('gemini-pro-vision')
-    response = model.generate_content([image[0], prompt])
-    return response.text
-
-#Function to load Google Gemini Pro Model and get response
-def get_response(prompt, input):
+# Function to load Google Gemini Pro Model and get response
+def get_response(prompt):
     model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content([prompt, input])
+    response = model.generate_content([prompt])
     return response.text
 
-    
-#Initialize the streamlit app
-st.set_page_config(page_title="Tripsa")
-st.image('D:\Tripsa\gaj.jpg', width=70)
-st.header("Tripsa: Discover and Plan your Culinary Adventures!")
+# Initialize the Streamlit app
+st.set_page_config(page_title="Tripsa: AI Trip Planner and Advisor", page_icon="🌍", layout="centered")
+st.header("🌍 Tripsa: Your Conversational AI Trip Planner!")
 
+# Initialize session state
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "conversation_stage" not in st.session_state:
+    st.session_state.conversation_stage = "greeting"
+if "trip_details" not in st.session_state:
+    st.session_state.trip_details = {
+        "destination": None,
+        "number_of_people": None,
+        "duration": None,
+        "type_of_trip": None,
+        "type_of_stay": None,
+    }
 
-#Creating radio section choices
-section_choice = st.radio("Choose Section:", ("Trip Planner", "Restaurant & Hotel Planner"))
+# Conversation stages logic
+def handle_conversation(user_message):
+    stage = st.session_state.conversation_stage
+    trip_details = st.session_state.trip_details
 
-###########################################################################################
-#If the choice is trip planner
-if section_choice == "Trip Planner":
+    if stage == "greeting":
+        st.session_state.conversation_stage = "ask_destination"
+        return "Hello! I'm Tripsa, your AI travel planner. Let's plan your perfect trip! Where would you like to go?"
 
-    #Prompt Template
-    input_prompt_planner = """
-    You are an expert Tour Planner. Your job is to provide recommendations and plan for given location for giner number of days,and given number of people
-    and type of trip(Freinds, Family, Solo, Honeymoon, Adventure, etc.).
-    even if number of days is not provided.
-    Also, suggest hidden secrets, hotels, and beautiful places we shouldn't forget to visit
-    Also tell best month to visit given place.
-    Retun the response using markdown.
-    """
+    elif stage == "ask_destination":
+        trip_details["destination"] = user_message
+        st.session_state.conversation_stage = "ask_number_of_people"
+        return f"Great choice! How many people are going on this trip?"
 
-    #Input
-    input_plan = st.text_area("Provide location, number of days, Number of People and Type of the trip to obtain itinerary plan!")
-    #Button
-    submit1 = st.button("Plan my Trip!")
-    if submit1:
-        response = get_response(input_prompt_planner, input_plan)
-        st.subheader("Planner Bot: ")
-        st.write(response)
-###########################################################################################
-#If the choice is Restaurant & Hotel Planner
-if section_choice == "Restaurant & Hotel Planner":
+    elif stage == "ask_number_of_people":
+        trip_details["number_of_people"] = user_message
+        st.session_state.conversation_stage = "ask_duration"
+        return "Got it. How many days will your trip last?"
 
-    #Prompt Template
-    input_prompt_planner = """
-    You are an expert Restaurant & Hotel Planner. 
-    Your job is to provide Restaurant & Hotel for given place and you have to provide not very expensive and not very cheap,
-    - Provide rating of the restaurant/hotel
-    - Top 5 restaurants with address and average cost per cuisine
-    - Top 5 hotels with address and average cost per night
-    Retun the response using markdown.
-    """
-    #Input
-    input_plan = st.text_area("Provide location to find Hotel & Restaurants!")
-    #Button
-    submit1 = st.button("Find Restaurant & Hotel!")
-    if submit1:
-        response = get_response(input_prompt_planner, input_plan)
-        st.subheader("Acomodation Bot: ")
-        st.write(response)
+    elif stage == "ask_duration":
+        trip_details["duration"] = user_message
+        st.session_state.conversation_stage = "ask_type_of_trip"
+        return "Perfect! What type of trip are you planning? (e.g., Family, Friends, Solo, Honeymoon, Adventure)"
+
+    elif stage == "ask_type_of_trip":
+        trip_details["type_of_trip"] = user_message
+        st.session_state.conversation_stage = "ask_type_of_stay"
+        return "Sounds fun! What type of stay do you prefer? (e.g., Hotel, Hostel, Airbnb, Resort)"
+
+    elif stage == "ask_type_of_stay":
+        trip_details["type_of_stay"] = user_message
+        st.session_state.conversation_stage = "generate_summary"
+        return "Thanks for the details! Let me prepare a personalized itinerary for you."
+
+    elif stage == "generate_summary":
+        st.session_state.conversation_stage = "done"
+        summary_prompt = f"""
+        You are an expert travel planner. Based on the following details, generate a detailed trip itinerary:
+        - Destination: {trip_details['destination']}
+        - Number of People: {trip_details['number_of_people']}
+        - Duration: {trip_details['duration']} days
+        - Type of Trip: {trip_details['type_of_trip']}
+        - Type of Stay: {trip_details['type_of_stay']}
+        Include must-visit spots, hidden gems, and best months to visit. Return the response in markdown format.
+        """
+        return get_response(summary_prompt)
+
+    else:
+        return "Is there anything else you'd like to plan or ask about?"
+
+# Main chat interface
+st.markdown("### Chat with your AI Planner")
+
+# Display existing chat messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Input for new user messages
+if user_input := st.chat_input("Type your message here..."):
+    # Append user message to chat history
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    # Get bot response based on conversation stage
+    bot_response = handle_conversation(user_input)
+    st.session_state.messages.append({"role": "assistant", "content": bot_response})
+    with st.chat_message("assistant"):
+        st.markdown(bot_response)
