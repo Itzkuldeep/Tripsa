@@ -82,12 +82,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 ## 📧 Contact
-For queries or feedback, please reach out at `your.email@example.com`.
-
-```
-
----
-
-### GitHub Repository Description
+For queries or feedback, please reach out at `itzkuldeep2002@gmail.com`.
 
 ```
